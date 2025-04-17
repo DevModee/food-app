@@ -9,7 +9,7 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator id={undefined} initialRouteName="Auth">
+      <Stack.Navigator id={undefined} initialRouteName="Auth" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Auth" component={AuthNavigator} />
         <Stack.Screen name="Welcome" component={HomeScreen} />
       </Stack.Navigator>
