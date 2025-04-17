@@ -10,6 +10,7 @@ const HomeScreen = () => {
   const [weight, setWeight] = useState('');
   const [weights, setWeights] = useState([]);
 
+
   const handleAddWeight = () => {
     if (!weight) return;
 
@@ -29,16 +30,6 @@ const HomeScreen = () => {
       month: 'short'
     }).replace('.', ''),
   }));
-
-  useEffect(() => {
-    const fetchUsername = async () => {
-      const savedUsername = await AsyncStorage.getItem('username');
-      if (savedUsername) {
-        console.log('Username loaded:', savedUsername);
-      }
-    };
-    fetchUsername();
-  }, []);
 
   useEffect(() => {
     const loadWeights = async () => {

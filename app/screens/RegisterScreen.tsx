@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Alert, Button, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { register } from '../api/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegisterScreen = ({ navigation }): any => {
   const [username, setUsername] = useState('');
@@ -10,7 +11,8 @@ const RegisterScreen = ({ navigation }): any => {
     try {
       const user = await register(username, password);
       Alert.alert('Registro exitoso');
-      navigation.navigate('Home', { username: user.username });
+      await AsyncStorage.setItem('username', user.username);
+      Alert.alert('Registro exitoso');
     } catch (error) {
       Alert.alert('Error', 'No se pudo registrar el usuario');
     }

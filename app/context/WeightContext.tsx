@@ -15,11 +15,22 @@ type WeightContextType = {
 const WeightContext = createContext<WeightContextType | undefined>(undefined);
 
 export const WeightProvider = ({ children }: { children: React.ReactNode }) => {
-  const [username] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
   const [weightData, setWeightData] = useState<WeightEntry[]>([]);
 
   const addWeight = (entry: WeightEntry) => {
     setWeightData((prev) => [...prev, entry]);
+  };
+
+  const loadUsername = async () => {
+    try {
+      const storedUsername = await AsyncStorage.getItem('username');
+      if (storedUsername) {
+        setUsername(storedUsername);
+      }
+    } catch (error) {
+      console.error('Error loading username', error);
+    }
   };
 
   const saveWeight = async (weights) => {
@@ -29,6 +40,10 @@ export const WeightProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Error saving weight data', error);
     }
   }
+
+  React.useEffect(() => {
+    loadUsername();
+  }, []);
 
   return (
     <WeightContext.Provider value={{ username, weightData, addWeight }}>
