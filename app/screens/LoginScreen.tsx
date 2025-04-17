@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Alert, Button, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { login } from '../api/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }): any => {
   const [username, setUsername] = useState('');
@@ -8,11 +9,22 @@ const LoginScreen = ({ navigation }): any => {
 
   const handleLogin = async () => {
     try {
-      const user = await login(username, password);
-      Alert.alert('Login existoso');
-      navigation.navigate('Home', { username: user.username });
-    } catch (error) {
-      Alert.alert('Error', 'Contraseña o email incorrecto');
+      const response = await login(username, password);
+      const loggedInUser = response.user;
+
+      if (loggedInUser && loggedInUser.username) {
+        await AsyncStorage.setItem('username', loggedInUser.username);
+        Alert.alert('Login existoso');
+        navigation.navigate('Home', { username: loggedInUser.username });
+      } else {
+        throw new Error('No se recibieron datos validos del usuario');
+      }
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        'Error al iniciar sesión';
+      console.error(message);
     }
   };
 
@@ -87,6 +99,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
   }
 });
-
 
 export default LoginScreen;

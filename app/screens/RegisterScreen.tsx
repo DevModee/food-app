@@ -2,19 +2,42 @@ import React, { useState } from 'react';
 import { View, TextInput, Alert, Button, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { register } from '../api/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useWeightContext } from '../context/WeightContext';
 
 const RegisterScreen = ({ navigation }): any => {
-  const [username, setUsername] = useState('');
+  const [username, setUsernameInput] = useState('');
   const [password, setPassword] = useState('');
 
+  const { setUsername } = useWeightContext();
+
+
   const handleRegister = async () => {
+    if (!username || !password) {
+      Alert.alert('Error', 'Por favor completa todos los campos.');
+      return;
+    }
+
     try {
-      const user = await register(username, password);
-      Alert.alert('Registro exitoso');
-      await AsyncStorage.setItem('username', user.username);
-      Alert.alert('Registro exitoso');
-    } catch (error) {
-      Alert.alert('Error', 'No se pudo registrar el usuario');
+      const response = await register(username, password);
+      console.log('Usuario registrado:', response);
+
+      const registeredUser = response.user;
+
+      if (registeredUser && registeredUser.username) {
+        await AsyncStorage.setItem('username', registeredUser.username);
+        setUsername(registeredUser.username); // <- IMPORTANTE
+        Alert.alert('Registro exitoso');
+        navigation.navigate('Home', { username: registeredUser.username });
+      } else {
+        throw new Error('No se recibieron datos válidos del usuario');
+      }
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        'Error al registrar el usuario';
+      Alert.alert('Error', message);
+      console.error(message);
     }
   };
 
@@ -27,7 +50,7 @@ const RegisterScreen = ({ navigation }): any => {
           placeholder="Nombre"
           placeholderTextColor="#111"
           value={username}
-          onChangeText={setUsername}
+          onChangeText={setUsernameInput}
         />
         <TextInput
           style={styles.input}

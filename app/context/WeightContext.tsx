@@ -10,6 +10,7 @@ type WeightContextType = {
   username: string;
   weightData: WeightEntry[];
   addWeight: (entry: WeightEntry) => void;
+  setUsername: (username: string) => void;
 };
 
 const WeightContext = createContext<WeightContextType | undefined>(undefined);
@@ -46,7 +47,7 @@ export const WeightProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <WeightContext.Provider value={{ username, weightData, addWeight }}>
+    <WeightContext.Provider value={{ username, weightData, addWeight, setUsername }}>
       {children}
     </WeightContext.Provider>
   )
