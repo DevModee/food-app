@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type WeightEntry = {
   value: number;
@@ -20,6 +21,14 @@ export const WeightProvider = ({ children }: { children: React.ReactNode }) => {
   const addWeight = (entry: WeightEntry) => {
     setWeightData((prev) => [...prev, entry]);
   };
+
+  const saveWeight = async (weights) => {
+    try {
+      await AsyncStorage.setItem('weights', JSON.stringify(weights));
+    } catch (error) {
+      console.error('Error saving weight data', error);
+    }
+  }
 
   return (
     <WeightContext.Provider value={{ username, weightData, addWeight }}>

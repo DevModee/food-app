@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useWeightContext } from '../context/WeightContext';
 import { LineChart } from 'react-native-gifted-charts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
 
   const { username, weightData, addWeight } = useWeightContext();
-  const [weight, setWeight] = useState('')
+  const [weight, setWeight] = useState('');
+  const [weights, setWeights] = useState([]);
 
   const handleAddWeight = () => {
     if (!weight) return;
@@ -20,10 +22,38 @@ const HomeScreen = () => {
     setWeight('');
   };
 
-  const chartData = weightData.map((entry) => ({
-    value: entry.value,
-    label: new Date(entry.date).getDate().toString(),
+  const chartData = weightData.map((item) => ({
+    value: item.value,
+    label: new Date(item.date).toLocaleDateString('es-Es', {
+      day: '2-digit',
+      month: 'short'
+    }).replace('.', ''),
   }));
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      const savedUsername = await AsyncStorage.getItem('username');
+      if (savedUsername) {
+        console.log('Username loaded:', savedUsername);
+      }
+    };
+    fetchUsername();
+  }, []);
+
+  useEffect(() => {
+    const loadWeights = async () => {
+      try {
+        const storedWeights = await AsyncStorage.getItem('weights');
+        if (storedWeights) {
+          setWeights(JSON.parse(storedWeights));
+        }
+      } catch (error) {
+        console.error('Error loading weights', error);
+      }
+    };
+
+    loadWeights();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -53,6 +83,9 @@ const HomeScreen = () => {
             color="#4a90e2"
             hideDataPoints={false}
             yAxisTextStyle={{ color: '#4a90e2' }}
+            xAxisLabelTextStyle={{ color: '#ccc', fontSize: 12 }}
+            yAxisLabelWidth={30}
+            maxValue={120}
           />
         </View>
       )}
