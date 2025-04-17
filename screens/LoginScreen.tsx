@@ -1,25 +1,37 @@
 import React, { useState } from 'react';
 import { View, TextInput, Alert, Button } from 'react-native';
-import api from '../api/api';
+import { login } from '../api/api';
 
-export default function LoginScreen() {
+const LoginScreen = ({ navigation }): any => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLolgin = async () => {
+  const handleLogin = async () => {
     try {
-      const res = await api.post('/auth/login', { email, password });
+      const user = await login(email, password);
       Alert.alert('Login existoso');
+      navigation.navigate('Bienvenido', { username: user.name });
     } catch (error) {
-      Alert.alert('Error');
+      Alert.alert('Error', 'Contraseña o email incorrecto');
     }
   };
 
   return (
     <View style={{ padding: 20 }}>
-      <TextInput placeholder="Emaill" value={email} onChangeText={setEmail} />"
-      <TextInput placeholder="Contraseña" secureTextEntry value={password} onChangeText={setPassword} />
-      <Button title="Iniciar sesión" onPress={handleLolgin} />
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        placeholder="Contraseña"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <Button title="Login" onPress={handleLogin} />
     </View>
-  )
-}
+  );
+};
+
+export default LoginScreen;
