@@ -19,3 +19,34 @@ export const register = async (username: string, password: string) => {
     throw new Error(error.response?.data?.message || error.message || 'Error al registrar usuario');
   }
 }
+
+export const getWeightByDate = async (userId: number, startDate: string, endDate: string) => {
+  try {
+    const res = await axios.get(`/weights/${userId}?start=${startDate}&end=${endDate}`);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || 'Error al obtener peso por fecha');
+  }
+}
+
+export const addWeight = async (userId: number, value: number, date: string) => {
+  try {
+    const res = await axios.post(`${api}/weight`, {
+      userId,
+      value,
+      date
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || 'Error al agregar peso');
+  }
+}
+
+export const updateWeight = async (id: number, value: number, date: string) => {
+  try {
+    const res = await axios.put(`${api}/weight/${id}`);
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || 'Error al actualizar peso');
+  }
+}

@@ -1,50 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useWeightContext } from '../context/WeightContext';
 import { LineChart } from 'react-native-gifted-charts';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import DatePickerInput from '../components/DatePickerInput';
 
 const HomeScreen = () => {
 
-  const { username, weightData, addWeight } = useWeightContext();
+  const { userId, username, weightData, addWeight } = useWeightContext();
   const [weight, setWeight] = useState('');
-  const [weights, setWeights] = useState([]);
-
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const handleAddWeight = () => {
-    if (!weight) return;
+    if (!weight) {
+      Alert.alert('Error', 'Por favor ingresa un peso válido.');
+      return;
+    }
+    const isoDate = selectedDate.toISOString().split('T')[0];
+
+    const existing = weightData.find(
+      (item) => item.userId === userId && item.date.startsWith(isoDate)
+    );
 
     const newEntry = {
       value: parseFloat(weight),
-      date: new Date().toISOString(),
+      date: selectedDate.toISOString(),
+      userId: username,
     };
 
-    addWeight(newEntry);
-    setWeight('');
+    if (existing) {
+      Alert.alert('Error', 'Ya existe un peso registrado para esta fecha');
+    } else {
+      addWeight(newEntry);
+      setWeight('');
+    }
   };
 
-  const chartData = weightData.map((item) => ({
-    value: item.value,
-    label: new Date(item.date).toLocaleDateString('es-Es', {
-      day: '2-digit',
-      month: 'short'
-    }).replace('.', ''),
-  }));
-
-  useEffect(() => {
-    const loadWeights = async () => {
-      try {
-        const storedWeights = await AsyncStorage.getItem('weights');
-        if (storedWeights) {
-          setWeights(JSON.parse(storedWeights));
-        }
-      } catch (error) {
-        console.error('Error loading weights', error);
-      }
-    };
-
-    loadWeights();
-  }, []);
+  const chartData = weightData
+    .filter(item => item.userId === userId)
+    .map((item) => ({
+      value: item.value,
+      label: new Date(item.date).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'short'
+      }).replace('.', ''),
+    }));
 
   return (
     <View style={styles.container}>
@@ -52,6 +51,8 @@ const HomeScreen = () => {
       <Text style={styles.weightTitle}>
         ¿Cuánto pesás hoy?
       </Text>
+
+      <DatePickerInput date={selectedDate} setDate={setSelectedDate} />
 
       <TextInput
         placeholder="Ej: 70,.3"
@@ -63,6 +64,21 @@ const HomeScreen = () => {
       <View style={styles.confirmationButton}>
         <Button title="Agregar peso" onPress={handleAddWeight} />
       </View>
+
+      {weightData.length === 0 ? (
+        <Text style={{ textAlign: 'center', marginTop: 20 }}>
+          No hay datos de peso disponibles. Agrega tu primer peso para comenzar.
+        </Text>
+      ) : weightData.some(
+          (item) =>
+            item.userId === userId &&
+            item.date.startsWith(selectedDate.toISOString().split('T')[0])
+        ) ? (
+        <Text style={{ textAlign: 'center', marginTop: 20 }}>
+          Ya registraste un peso para esta fecha.
+        </Text>
+      ) : null}
+
 
       {chartData.length > 0 && (
         <View style={styles.weightChart}>
