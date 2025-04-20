@@ -8,7 +8,7 @@ const RegisterScreen = ({ navigation }): any => {
   const [username, setUsernameInput] = useState('');
   const [password, setPassword] = useState('');
 
-  const { setUsername } = useWeightContext();
+  const { setUser } = useWeightContext();
 
 
   const handleRegister = async () => {
@@ -24,8 +24,7 @@ const RegisterScreen = ({ navigation }): any => {
       const registeredUser = response.user;
 
       if (registeredUser && registeredUser.username) {
-        await AsyncStorage.setItem('username', registeredUser.username);
-        setUsername(registeredUser.username); // <- IMPORTANTE
+        setUser(registeredUser.id, registeredUser.username, true);
         Alert.alert('Registro exitoso');
         navigation.navigate('Home', { username: registeredUser.username });
       } else {
